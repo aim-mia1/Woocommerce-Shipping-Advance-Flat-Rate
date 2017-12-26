@@ -1,7 +1,7 @@
 # Advance Flat Rate Shipping For WooCommerce
 == Description ==
 
-Advance Flat Rate Shipping For WooCommerce provides ability to set different shipping rates for shipping classes and cities.
+Advance Flat Rate Shipping For WooCommerce provides ability to set different shipping rates for cities wrt shipping classes .
 
 == Installation ==
 

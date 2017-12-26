@@ -180,14 +180,9 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 		if ( empty( $package['destination']['country']) || empty($package['destination']['city'] ) ) {
 			return false;
 		}
-
-
-		//$this->calculation_type
+	
 		$this->package = $package;
-		
-		
-		
-
+	
 		$cityIndex=0;
 
 		foreach($this->table_rates['tr_city_name'] as $citykey => $cityname)
