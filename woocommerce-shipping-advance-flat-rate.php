@@ -67,7 +67,8 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 				add_filter( 'woocommerce_shipping_methods', array( $this, 'add_method' ) );
 			
 				//add_action( 'admin_notices', array( $this, 'upgrade_notice' ) );
-				//add_action( 'wp_ajax_afr_dismiss_upgrade_notice', array( $this, 'dismiss_upgrade_notice' ) );
+				//add_action( 'wp_ajax_afr_dismiss_upgrade_notice', array( $this, 'afr_dismiss_upgrade_notice' ) );
+				//add_action( 'wp_ajax_nopriv_afr_dismiss_upgrade_notice', array( $this, 'afr_dismiss_upgrade_notice' ) );
 
 			} else {
 				add_action( 'admin_notices', array( $this, 'wc_deactivated' ) );
@@ -116,12 +117,12 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 				unset( $afr_settings['enabled'] );
 
 				// add it to the "rest of the world" zone when no AFR.
-				if ( ! $this->is_zone_has_afr( 0 ) ) {
-					$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->prefix}woocommerce_shipping_zone_methods ( zone_id, method_id, method_order, is_enabled ) VALUES ( %d, %s, %d, %d )", 0, 'afr', 1, 1 ) );
+				//if ( ! $this->is_zone_has_afr( 0 ) ) {
+				//	$wpdb->query( $wpdb->prepare( "INSERT INTO {$wpdb->prefix}woocommerce_shipping_zone_methods ( zone_id, method_id, method_order, is_enabled ) VALUES ( %d, %s, %d, %d )", 0, 'afr', 1, 1 ) );
 					// add settings to the newly created instance to options table
-					$instance = $wpdb->insert_id;
-					add_option( 'woocommerce_afr_' . $instance . '_settings', $afr_settings );
-				}
+				//	$instance = $wpdb->insert_id;
+				//	add_option( 'woocommerce_afr_' . $instance . '_settings', $afr_settings );
+				//}
 
 				update_option( 'woocommerce_afr_show_upgrade_notice', 'yes' );
 			}
@@ -201,7 +202,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 		/**
 		 * Turn of the dismisable upgrade notice.
 		 */
-		public function dismiss_upgrade_notice() {
+		public function afr_dismiss_upgrade_notice() {
 			update_option( 'woocommerce_afr_show_upgrade_notice', 'no' );
 		}
 	}

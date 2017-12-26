@@ -69,7 +69,7 @@
 					<?php foreach($this->get_def_shipping_classes() as $sclass){?>
 						<td><input type="text" size="5" name="tr_class_<?php echo $sclass->slug; ?>[0]" value="<?php  echo $this->table_rates['tr_class_'.$sclass->slug][0];?>" /></td>
 					<?php }?>
-					<td><input type="checkbox" name="tr_enabled[0]" <?php checked( $this->table_rates['tr_enabled'][0], 'on' ); ?>/></td>
+					<td><input readonly type="checkbox" name="tr_enabled[0]" <?php checked( $this->table_rates['tr_enabled'][0], 'on' ); ?>/></td>
 				</tr>
 
 
@@ -80,7 +80,7 @@
 							?>
 							<tr>
 								<td class="check-column"><input type="checkbox" /></td>
-								<td><input type="text" size="10" name="tr_city_name[<?php echo $key; ?>]" value="<?php echo $this->table_rates['tr_city_name'][$key];?>" /></td>
+								<td><input type="text" size="20" name="tr_city_name[<?php echo $key; ?>]" value="<?php echo $this->table_rates['tr_city_name'][$key];?>" /></td>
 								<td><input type="text" size="5" name="tr_no_class[<?php echo $key; ?>]" value="<?php echo $this->table_rates['tr_no_class'][$key];?>" /></td>
 								<?php foreach($this->get_def_shipping_classes() as $sclass){?>
 									<td><input type="text" size="5" name="tr_class_<?php echo $sclass->slug; ?>[<?php echo $key; ?>]" value="<?php echo $this->table_rates['tr_class_'.$sclass->slug][$key];?>" /></td>
