@@ -250,9 +250,12 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 
 		$sclasses_index = 0;
 
+		$all_shipping_class_found = array();
+
 		foreach ( $package['contents'] as $item_id => $values ) 
 		{
 			$cart_item_shipping_class = $values['data']->get_shipping_class();
+			$all_shipping_class_found[] = $cart_item_shipping_class;
 
 			$priceForClass = 0;
 
@@ -311,6 +314,8 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 		}
 
 		$this->debug_messages( __( 'AFR debug mode is on - to hide these messages, turn debug mode off in the settings.', 'woocommerce-shipping-afr' ) );
+		$this->debug_messages( __( 'Shipping Class: '.implode(', ', $all_shipping_class_found), 'woocommerce-shipping-afr' ) );
+		$this->debug_messages( __( 'Package Details: '.json_encode($package), 'woocommerce-shipping-afr' ) );
 
 		$mrate = array(
 	        'id' => $this->id,
