@@ -2,7 +2,7 @@
 Contributors: Ishtiaq A.
 Requires at least: 4.0
 Tested up to: 4.9
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 
 Shipping classes wise flate rate for different cities in country/state/region.
@@ -36,6 +36,9 @@ So you can set different flat rate shipping for each city in the zone. With addi
 == Changelog ==
 
 = 1.0.0 =
-*Release Date - 1st December, 2017*
+*Release Date - 22 December, 2017*
 
 * First Release
+
+= 1.0.1 =
+*Release Date - 27 December, 2017*
