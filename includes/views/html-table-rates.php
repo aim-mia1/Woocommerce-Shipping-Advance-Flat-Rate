@@ -1,12 +1,20 @@
+<?php 
+/**
+*   Admin => adv_table_rates view
+*	
+* @since 1.0.0
+* @version 1.0.1
+*/?>
+
 <tr valign="top" id="packing_options">
 	<th scope="row" class="titledesc"><?php _e( 'Shipping Prices', 'woocommerce-shipping-afr' ); ?></th>
 	<td class="forminp">
 		<style type="text/css">
-			.afr_boxes td, .afr_services td {
+			.afr_boxes td{
 				vertical-align: middle;
 				padding: 4px 7px;
 			}
-			.afr_services th, .afr_boxes th {
+			.afr_boxes th {
 				padding: 9px 7px;
 			}
 			.afr_boxes td input {
@@ -14,20 +22,19 @@
 			}
 			.afr_boxes .check-column {
 				vertical-align: middle;
-				text-align: left;
+				text-align: center!important;
 				padding: 0 7px;
 			}
-			.afr_services th.sort {
-				width: 16px;
-				padding: 0 16px;
+			.afr_boxes .center{ 
+				text-align: center!important;
 			}
-			.afr_services td.sort {
-				cursor: move;
-				width: 16px;
-				padding: 0 16px;
-				cursor: move;
-				background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAHUlEQVQYV2O8f//+fwY8gJGgAny6QXKETRgEVgAAXxAVsa5Xr3QAAAAASUVORK5CYII=) no-repeat center;
+
+			.afr_boxes input[type="number"]{
+				width:96px !important;
+				line-height:20px !important;
 			}
+
+			
 		</style> <?php //var_dump($this->table_rates);?>
 		<table class="afr_boxes widefat">
 			<thead>
@@ -35,20 +42,20 @@
 					<?php 
 						$newrec='<tr class="new">\
 							<td class="check-column"><input type="checkbox" /></td>\
-							<td><input type="text" size="20" name="tr_city_name[\' + size + \']" /></td>\
-							<td><input type="text" size="5" name="tr_no_class[\' + size + \']"  value="0"/></td>\ ';
+							<td><input type="text" size="25" name="tr_city_name[\' + size + \']" required  placeholder="City Name" /></td>\
+							<td class="center"><input type="number" name="tr_no_class[\' + size + \']" required  placeholder="0.00"/></td>\ ';
 						foreach($this->get_def_shipping_classes() as $sclass){ 
-							$newrec.='<td><input type="text" size="5" name="tr_class_'.$sclass->slug.'[\' + size + \']"  value="0"/></td>\ '; }
-							$newrec.='<td><input type="checkbox" name="tr_enabled[\' + size + \']" value="0"/></td>\
+							$newrec.='<td class="center"><input type="number"  name="tr_class_'.$sclass->slug.'[\' + size + \']" required placeholder="0.00"/></td>\ '; }
+							$newrec.='<td class="center"><input type="checkbox" name="tr_enabled[\' + size + \']" value="on" checked/></td>\
 						</tr>';?>
 
 					<th class="check-column"><input type="checkbox" /></th>
 					<th><?php _e( 'City', 'woocommerce-shipping-afr' ); ?></th>
-					<th><?php _e( 'No Class('.get_woocommerce_currency().')', 'woocommerce-shipping-afr' ); ?></th>
+					<th class="center"><?php _e( 'Default ('.get_woocommerce_currency_symbol().')', 'woocommerce-shipping-afr' ); ?></th>
 					<?php foreach($this->get_def_shipping_classes() as $sclass){?>
-						<th><?php echo $sclass->name.'('.get_woocommerce_currency().')'; ?></th>
+						<th class="center"><?php echo $sclass->name.' ('.get_woocommerce_currency_symbol().')'; ?></th>
 					<?php }?>
-					<th><?php _e( 'Enabled', 'woocommerce-shipping-fedex' ); ?></th>
+					<th class="center"><?php _e( 'Enabled', 'woocommerce-shipping-fedex' ); ?></th>
 				</tr>
 				</tr>
 			</thead>
@@ -63,13 +70,13 @@
 			<tbody id="rates">
 
 				<tr>
-					<td class="check-column"></td>
-					<td><input type="text" size="20" name="tr_city_name[0]"  value="<?php echo $this->table_rates['tr_city_name'][0];?>" readonly/></td>
-					<td><input type="text" size="5" name="tr_no_class[0]"  value="<?php echo $this->table_rates['tr_no_class'][0];?>" /></td>
+					<td class="check-column"><input type="checkbox" disabled readonly /></td>
+					<td><input type="text" size="25" name="tr_city_name[0]"  value="<?php echo $this->table_rates['tr_city_name'][0];?>" readonly required placeholder="City Name" /></td>
+					<td class="center"><input type="number"  name="tr_no_class[0]"  value="<?php echo $this->table_rates['tr_no_class'][0];?>" required placeholder="0.00"/></td>
 					<?php foreach($this->get_def_shipping_classes() as $sclass){?>
-						<td><input type="text" size="5" name="tr_class_<?php echo $sclass->slug; ?>[0]" value="<?php  echo $this->table_rates['tr_class_'.$sclass->slug][0];?>" /></td>
+						<td class="center"><input type="number"  name="tr_class_<?php echo $sclass->slug; ?>[0]" value="<?php  echo $this->table_rates['tr_class_'.$sclass->slug][0];?>" required placeholder="0.00"/></td>
 					<?php }?>
-					<td><input readonly type="checkbox" name="tr_enabled[0]" <?php checked( $this->table_rates['tr_enabled'][0], 'on' ); ?>/></td>
+					<td class="center"><input type="checkbox" checked disabled readonly/></td>
 				</tr>
 
 
@@ -80,12 +87,12 @@
 							?>
 							<tr>
 								<td class="check-column"><input type="checkbox" /></td>
-								<td><input type="text" size="20" name="tr_city_name[<?php echo $key; ?>]" value="<?php echo $this->table_rates['tr_city_name'][$key];?>" /></td>
-								<td><input type="text" size="5" name="tr_no_class[<?php echo $key; ?>]" value="<?php echo $this->table_rates['tr_no_class'][$key];?>" /></td>
+								<td><input type="text" size="25" name="tr_city_name[<?php echo $key; ?>]" value="<?php echo $this->table_rates['tr_city_name'][$key];?>" required placeholder="City Name" /></td>
+								<td class="center"><input type="number"  name="tr_no_class[<?php echo $key; ?>]" value="<?php echo $this->table_rates['tr_no_class'][$key];?>" required placeholder="0.00"/></td>
 								<?php foreach($this->get_def_shipping_classes() as $sclass){?>
-									<td><input type="text" size="5" name="tr_class_<?php echo $sclass->slug; ?>[<?php echo $key; ?>]" value="<?php echo $this->table_rates['tr_class_'.$sclass->slug][$key];?>" /></td>
+									<td class="center"><input type="number"  name="tr_class_<?php echo $sclass->slug; ?>[<?php echo $key; ?>]" value="<?php echo $this->table_rates['tr_class_'.$sclass->slug][$key];?>" required placeholder="0.00"/></td>
 								<?php }?>
-								<td><input type="checkbox" name="tr_enabled[<?php echo $key; ?>]" <?php checked( $this->table_rates['tr_enabled'][$key], 'on' ); ?>/></td>
+								<td class="center"><input type="checkbox" name="tr_enabled[<?php echo $key; ?>]" <?php checked( $this->table_rates['tr_enabled'][$key], 'on' ); ?> value="on"/></td>
 							</tr>
 							<?php
 						}

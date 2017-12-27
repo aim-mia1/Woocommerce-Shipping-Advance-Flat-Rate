@@ -1,4 +1,10 @@
-<?php
+<?php 
+/**
+*   Admin => Advance Flat Rate Settings
+*	
+* @since 1.0.0
+*/
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
