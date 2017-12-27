@@ -42,3 +42,6 @@ So you can set different flat rate shipping for each city in the zone. With addi
 
 = 1.0.1 =
 *Release Date - 27 December, 2017*
+
+* Added Comments.
+* Enable/disable checkbox fix.
