@@ -35,6 +35,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 	 *
 	 */
 	function activate_wc_shipping_afr() {
+		add_option( 'woocommerce_afr_show_upgrade_notice','yes');
 	}
 	register_activation_hook( __FILE__, 'activate_wc_shipping_afr' );
 
@@ -47,6 +48,8 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 	function deactivate_wc_shipping_afr() {
 		//global $wpdb;
 		//$wpdb->query( "DELETE from {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE method_id='afr' ") ;
+
+		delete_option( 'woocommerce_afr_show_upgrade_notice');
 	}
 	register_deactivation_hook( __FILE__, 'deactivate_wc_shipping_afr' );
 
@@ -152,13 +155,6 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 				add_action( 'admin_notices', array( $this, 'wc_incompitable_version' ) );
 			}
 
-			$show_notice = get_option( 'woocommerce_afr_show_upgrade_notice', 'yes');
-			
-			if($show_notice == 'yes')
-			{
-				update_option( 'woocommerce_afr_show_upgrade_notice', 'yes');
-			}
-			
 			return true;
 		}
 
@@ -236,7 +232,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 			$zones_admin_url = add_query_arg( $query_args, get_admin_url() . 'admin.php' );
 			?>
 			<div class="notice notice-success is-dismissible wc-afr-notice">
-				<p><?php echo sprintf( __( 'AFR now supports shipping zones. See the zones %1$shere%2$s ', 'woocommerce-shipping-afr' ),'<a href="' . $zones_admin_url . '">','</a>' ); ?></p>
+				<p><?php echo sprintf( __( 'Advance Flat Rate supports shipping zones. See the zones %1$shere%2$s ', 'woocommerce-shipping-afr' ),'<a href="' . $zones_admin_url . '">','</a>' ); ?></p>
 			</div>
 
 			<script type="application/javascript">
@@ -256,12 +252,10 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 		 */
 		public function afr_dismiss_upgrade_notice() {
 			update_option( 'woocommerce_afr_show_upgrade_notice', 'no' );
-			echo get_option( 'woocommerce_afr_show_upgrade_notice' );
+			//echo get_option( 'woocommerce_afr_show_upgrade_notice' );
 
 		}
 	}
 
 	add_action( 'plugins_loaded' , array( 'WC_Shipping_AFR_Init', 'get_instance' ), 0 );
-
-
 }
