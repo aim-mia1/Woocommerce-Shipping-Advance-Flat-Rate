@@ -1,17 +1,18 @@
 <?php
 
 /**
- Plugin Name: Advance Flat Rate Shipping For WooCommerce
- Description: Advance Flat Rate Shipping For WooCommerce provides ability to set different shipping rates for shipping classes and cities.
- Author: DatumSquare
- Version: 1.0.1
- Author URI: http://datumsquare.com/
- Plugin URI: https://datumsquare.com/products/wp/plugins/woo-shipping-adv-flat-rate
- WC requires at least: 4.0
- WC tested up to: 4.9
- Copyright: 2017 DatumSquare.
- License: GNU General Public License v3.0
- License URI: http://www.gnu.org/licenses/gpl-3.0.html
+* Plugin Name: Advance Flat Rate Shipping For WooCommerce
+* Description: AFR Shipping For WooCommerce provides ability to set different shipping rates for shipping classes and cities.
+* Author: M Ishtiaq Awan
+* Version: 1.0.1
+* Author URI: https://www.allshorevirtualstaffing.com/resume/?dev_id=740770587&dev_name=Ishtiaq%20A.
+* WC requires at least: 3.2.0
+* WC tested up to: 3.2.6
+* Copyright: 2017 AllShoreVirtualStaffing.
+* License: GNU General Public License v3.0
+* License URI: http://www.gnu.org/licenses/gpl-3.0.html
+* Text Domain: woocommerce-shipping-afr
+*
 */
 
 // If this file is called directly, abort.
@@ -166,7 +167,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 		 *
 		 */
 		public function load_textdomain() {
-			load_plugin_textdomain( 'woocommerce-shipping-aft', false, basename( dirname( __FILE__ ) ) . '/languages' );
+			load_plugin_textdomain( 'woocommerce-shipping-afr', false, basename( dirname( __FILE__ ) ) . '/languages' );
 		}
 
 		/**
