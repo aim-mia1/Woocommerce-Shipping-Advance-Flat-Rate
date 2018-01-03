@@ -53,8 +53,8 @@
 			</tfoot>
 			<tbody id="rates">
 
-				<?php if ( $this->weight_ranges ) {
-						foreach ( $this->weight_ranges['weight_class'] as $key => $trate ) {
+				<?php if ( $this->weight_ranges ) :
+						foreach ( $this->weight_ranges['weight_class'] as $key => $trate ) :
 							?>
 							<tr>
 								<td class="check-column"><input type="checkbox" /></td>
@@ -63,8 +63,8 @@
 								<td class="center"><input type="number"  name="max_weight[<?php echo $key; ?>]" value="<?php echo $this->weight_ranges['max_weight'][$key];?>" required placeholder="0.00"/></td>
 							</tr>
 							<?php
-						}
-					}?>
+						endforeach;
+					endif;?>
 
 			</tbody>
 		</table>

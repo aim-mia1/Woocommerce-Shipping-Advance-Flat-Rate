@@ -124,33 +124,30 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 
 		if(!isset($this->table_rates['tr_city_name'][0]))
 			$this->table_rates['tr_city_name'][0]='Default';
+
 		if(!isset($this->table_rates['tr_no_class'][0]))
 			$this->table_rates['tr_no_class'][0]='';
+
 		if(!isset($this->table_rates['tr_enabled'][0]))
 			$this->table_rates['tr_enabled'][0]='on';
 
-		if($this->weight_factor)
-		{
-			foreach($this->weight_ranges['weight_class'] as $sclass){
+		if($this->weight_factor):
+			foreach($this->weight_ranges['weight_class'] as $sclass):
 				if(!isset($this->table_rates['tr_class_'.$this->clean($sclass)][0]))
 					$this->table_rates['tr_class_'.$this->clean($sclass)][0]='';
-			}
-
-		}
-		else
-		{
-			foreach($this->get_def_shipping_classes() as $sclass){
+			endforeach;
+		else:
+			foreach($this->get_def_shipping_classes() as $sclass):
 				if(!isset($this->table_rates['tr_class_'.$sclass->slug][0]))
 					$this->table_rates['tr_class_'.$sclass->slug][0]='';
-			}
-		}
+			endforeach;
+		endif;
 
-		if(!isset($this->weight_ranges['weight_class']))
-		{
+		if(!isset($this->weight_ranges['weight_class'])):
 			$this->weight_ranges['weight_class'] = array('Small','Medium','Large');
 			$this->weight_ranges['min_weight']  = array(10,20,50);
 			$this->weight_ranges['max_weight']  = array(20,50,100);
-		}
+		endif;
 	}
 
 	
@@ -176,7 +173,7 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 	* @param
 	*/
 	public function load_admin_scripts() {
-		//wp_enqueue_script( 'jquery-ui-sortable' );
+		// May need this in future
 	}
 
 	/**
@@ -188,9 +185,9 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 	*/
 	public function debug_messages( $message, $type = 'notice' ) {
 
-		if ( $this->debug || ( current_user_can( 'manage_options' ) && 'error' == $type ) ) {
+		if ( $this->debug || ( current_user_can( 'manage_options' ) && 'error' == $type ) ):
 			wc_add_notice( $message, $type );
-		}
+		endif;
 
 	}
 	
@@ -216,7 +213,6 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 	*/
 	public function generate_adv_table_rates_html() {
 		ob_start();
-		//echo 'MIA';
 		include( 'views/html-table-rates.php' );
 		return ob_get_clean();
 	}
@@ -248,20 +244,15 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 		$my_table_rates['tr_city_name']       = isset( $_POST['tr_city_name'] ) ? $_POST['tr_city_name'] : array();
 		$my_table_rates['tr_no_class']      = isset( $_POST['tr_no_class'] ) ? $_POST['tr_no_class'] : array();
 
-		if($this->weight_factor)
-		{
-			foreach($this->weight_ranges['weight_class'] as $defclasses)
-			{
+		if($this->weight_factor):
+			foreach($this->weight_ranges['weight_class'] as $defclasses):
 				$my_table_rates['tr_class_'.$this->clean($defclasses)] = isset( $_POST['tr_class_'.$this->clean($defclasses)] ) ? $_POST['tr_class_'.$this->clean($defclasses)] : array();
-			}
-		}
-		else
-		{
-			foreach($this->get_def_shipping_classes() as $defclasses)
-			{
+			endforeach;
+		else:
+			foreach($this->get_def_shipping_classes() as $defclasses):
 				$my_table_rates['tr_class_'.$defclasses->slug] = isset( $_POST['tr_class_'.$defclasses->slug] ) ? $_POST['tr_class_'.$defclasses->slug] : array();
-			}
-		}
+			endforeach;
+		endif;
 
 		$my_table_rates['tr_enabled']    = isset( $_POST['tr_enabled'] ) ? $_POST['tr_enabled'] : array();
 		return $my_table_rates;
@@ -274,9 +265,8 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 	* @param
 	*/
 	public function is_available( $package ) {
-		if ( empty( $package['destination']['country']) || empty($package['destination']['city'] ) ) {
+		if ( empty( $package['destination']['country']) || empty($package['destination']['city'] ) ) 
 			return false;
-		}
 
 		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true, $package );
 	}
@@ -293,38 +283,24 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 	*/
 	public function calculate_shipping( $package = array() ) {
 		
-		// check if country and city is entered by customer
-		//if ( empty($package['destination']['country']) || empty($package['destination']['city'] ) ) {
-		//	return false;
-		//}
-	
 		// Find city index 
 		$cityIndex=0;
-		foreach($this->table_rates['tr_city_name'] as $citykey => $cityname)
-		{
-			if( strtolower($cityname) == strtolower($package['destination']['city']) )
-			{
+		foreach($this->table_rates['tr_city_name'] as $citykey => $cityname):
+			if( strtolower($cityname) == strtolower($package['destination']['city']) ):
 				if(isset($this->table_rates['tr_enabled'][$citykey]) && $this->table_rates['tr_enabled'][$citykey]=='on')
-				{
 					$cityIndex=$citykey;
-				}
 				break;
-			}
-		}
+			endif;
+		endforeach;
 
 		if($this->weight_factor)
-		{
 			$final_calculated_price = $this->weight_based($package,$cityIndex);
-		}
 		else
-		{
 			$final_calculated_price = $this->shipping_classes_based($package,$cityIndex);
-		}
 
 		$this->debug_messages( __( 'AFR debug mode is on - to hide these messages, turn debug mode off in the settings.', 'woocommerce-shipping-afr' ) );
 
-		if($final_calculated_price>0)
-		{
+		if($final_calculated_price>0):
 			$mrate = array(
 		        'id' => $this->id,
 		        'label' => $this->title,
@@ -332,7 +308,7 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 		    );
 		     
 		    $this->add_rate( $mrate );
-		}
+		endif;
 	}
 	/**
 	* get weight class
@@ -346,17 +322,14 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 	private function get_weight_class($weight)
 	{
 		$weight_class_index=-1;
-		if(!empty($weight) && $weight>0)
-		{
-			foreach($this->weight_ranges['weight_class'] as $key => $value)
-			{
-				if($this->weight_ranges['min_weight'][$key] <= $weight && $weight < $this->weight_ranges['max_weight'][$key])
-				{
+		if(!empty($weight) && $weight>0):
+			foreach($this->weight_ranges['weight_class'] as $key => $value):
+				if($this->weight_ranges['min_weight'][$key] <= $weight && $weight < $this->weight_ranges['max_weight'][$key]):
 					$weight_class_index=$key;
 					break;
-				}
-			}
-		}
+				endif;
+			endforeach;
+		endif;
 
 		return $weight_class_index;
 	}
@@ -373,38 +346,23 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 	private function get_price_for_weight($weight_class_index,$cityIndex)
 	{
 		$available_price = 0;
-		if($weight_class_index>=0)
-		{
+		if($weight_class_index>=0):
 			$weight_class = 'tr_class_'.$this->clean($this->weight_ranges['weight_class'][$weight_class_index]);
 			if(isset($this->table_rates[$weight_class][$cityIndex]) && $this->table_rates[$weight_class][$cityIndex]>-1)
-			{
 				$available_price =  $this->table_rates[$weight_class][$cityIndex];
-			}
-			else if(isset($this->table_rates['tr_no_class'][$cityIndex]) && $this->table_rates['tr_no_class'][$cityIndex]>-1)
-			{
+			elseif(isset($this->table_rates['tr_no_class'][$cityIndex]) && $this->table_rates['tr_no_class'][$cityIndex]>-1)
 				$available_price =  $this->table_rates['tr_no_class'][$cityIndex];
-			}
-			else if(isset($this->table_rates[$weight_class][0]) && $this->table_rates[$weight_class][0]>-1)
-			{
+			elseif(isset($this->table_rates[$weight_class][0]) && $this->table_rates[$weight_class][0]>-1)
 				$available_price =  $this->table_rates[$weight_class][0];
-			}
-			else if(isset($this->table_rates['tr_no_class'][0]) && $this->table_rates['tr_no_class'][0]>-1)
-			{
-				$available_price =  $this->table_rates['tr_no_class'][0];
-			}
-		}
-		else 
-		{
+			elseif(isset($this->table_rates['tr_no_class'][0]) && $this->table_rates['tr_no_class'][0]>-1)
+				$available_price =  $this->table_rates['tr_no_class'][0];;
+		else:
 			$weight_class = 'tr_no_class';
 			if(isset($this->table_rates[$weight_class][$cityIndex]) && $this->table_rates[$weight_class][$cityIndex]>-1)
-			{
 				$available_price =  $this->table_rates[$weight_class][$cityIndex];
-			}
-			else if(isset($this->table_rates[$weight_class][0]) && $this->table_rates[$weight_class][0]>-1)
-			{
+			elseif(isset($this->table_rates[$weight_class][0]) && $this->table_rates[$weight_class][0]>-1)
 				$available_price =  $this->table_rates[$weight_class][0];
-			}
-		}
+		endif;
 
 		return $available_price;
 	}
@@ -426,8 +384,7 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 
 		$all_weight_class_found = array();
 
-		foreach ( $package['contents'] as $item_id => $values ) 
-		{
+		foreach ( $package['contents'] as $item_id => $values ):
 			$cart_item_sub_weight=0;
 
 			$cart_item_weight = $values['data']->get_weight();
@@ -437,26 +394,21 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 			$weight_class_index = $this->get_weight_class($cart_item_sub_weight);
 
 			if($this->calculation_type == 'per_order')
-			{
 				$total_weight += $cart_item_sub_weight;
-			}
 			else
-			{
 				$total_price += $this->get_price_for_weight($weight_class_index,$cityIndex);		
-			}
-
+			
 			$all_weight_class_found[] = $cart_item_sub_weight;
 
-		}
+		endforeach;
 
-		if($this->calculation_type == 'per_order')
-		{
+		if($this->calculation_type == 'per_order'):
 			$total_price = 0;
 
 			$weight_class_index = $this->get_weight_class($total_weight);
 
 			$total_price = $this->get_price_for_weight($weight_class_index,$cityIndex);
-		}
+		endif;
 
 		$final_calculated_price=$total_price;
 
@@ -484,48 +436,26 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 
 		$all_shipping_class_found = array();
 
-		foreach ( $package['contents'] as $item_id => $values ) 
-		{
+		foreach ( $package['contents'] as $item_id => $values ) :
 			$cart_item_shipping_class = $values['data']->get_shipping_class();
 			$all_shipping_class_found[] = $cart_item_shipping_class;
 
 			$priceForClass = 0;
-			if(!empty($cart_item_shipping_class))
-			{
-				if( isset($this->table_rates['tr_class_'.$cart_item_shipping_class][$cityIndex]) 
-					&& $this->table_rates['tr_class_'.$cart_item_shipping_class][$cityIndex]>-1)
-				{
+			if(!empty($cart_item_shipping_class)):
+				if( isset($this->table_rates['tr_class_'.$cart_item_shipping_class][$cityIndex]) && $this->table_rates['tr_class_'.$cart_item_shipping_class][$cityIndex]>-1)
 					$priceForClass = $this->table_rates['tr_class_'.$cart_item_shipping_class][$cityIndex];
-				}
-				else if(isset($this->table_rates['tr_no_class'][$cityIndex]) 
-						&& $this->table_rates['tr_no_class'][$cityIndex]>-1)
-				{
+				else if(isset($this->table_rates['tr_no_class'][$cityIndex]) && $this->table_rates['tr_no_class'][$cityIndex]>-1)
 					$priceForClass = $this->table_rates['tr_no_class'][$cityIndex];
-				}
-				else if(isset($this->table_rates['tr_class_'.$cart_item_shipping_class][0]) 
-						&& $this->table_rates['tr_class_'.$cart_item_shipping_class][0]>-1)
-				{
+				else if(isset($this->table_rates['tr_class_'.$cart_item_shipping_class][0]) && $this->table_rates['tr_class_'.$cart_item_shipping_class][0]>-1)
 					$priceForClass = $this->table_rates['tr_class_'.$cart_item_shipping_class][0];	
-				}
-				else if(isset($this->table_rates['tr_no_class'][0]) 
-						&& $this->table_rates['tr_no_class'][0]>-1)
-				{
-					$priceForClass = $this->table_rates['tr_no_class'][0];	
-				}
-			}
-			else
-			{
-				if(isset($this->table_rates['tr_no_class'][$cityIndex]) 
-						&& $this->table_rates['tr_no_class'][$cityIndex]>-1)
-				{
+				else if(isset($this->table_rates['tr_no_class'][0]) && $this->table_rates['tr_no_class'][0]>-1)
+					$priceForClass = $this->table_rates['tr_no_class'][0];;
+			else:
+				if(isset($this->table_rates['tr_no_class'][$cityIndex]) && $this->table_rates['tr_no_class'][$cityIndex]>-1)
 					$priceForClass = $this->table_rates['tr_no_class'][$cityIndex];
-				}
-				else if(isset($this->table_rates['tr_no_class'][0]) 
-						&& $this->table_rates['tr_no_class'][0]>-1)
-				{
+				else if(isset($this->table_rates['tr_no_class'][0]) && $this->table_rates['tr_no_class'][0]>-1)
 					$priceForClass = $this->table_rates['tr_no_class'][0];
-				}
-			}
+			endif;
 
 
 
@@ -533,51 +463,38 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 			$priceForClassArr = explode("*", $priceForClass);
 
 			if(strtolower(@$priceForClassArr[1]) == '[qty]' && is_numeric($priceForClassArr[0]))
-			{
 				$priceForClass = $priceForClassArr[0] * $values['quantity'];
-			}
 			else if(is_numeric($priceForClassArr[0]))
-			{
 				$priceForClass = $priceForClassArr[0];
-			}
 			else
 				$priceForClass=0;
 
 			$allClassPrice += $priceForClass;
 
-			if($sclasses_index==0)
-			{
+			if($sclasses_index==0):
 				$minPriceClass=$priceForClass;
 				$maxPriceClass=$priceForClass;
-			}
-			else
-			{
+			else:
 				if($priceForClass<$minPriceClass)
 					$minPriceClass = $priceForClass;
 
 				if($priceForClass>$maxPriceClass)
 					$maxPriceClass = $priceForClass;
-			}
+			endif;
 
 			$sclasses_index++;
-		}
+		endforeach;
 
 
 		$final_calculated_price=0;
 
 		if($this->calculation_type == 'per_order_max')
-		{
 			$final_calculated_price=$maxPriceClass;
-		}
 		else if($this->calculation_type == 'per_order_min')
-		{
 			$final_calculated_price=$minPriceClass;			
-		}
 		else 
-		{
 			$final_calculated_price=$allClassPrice;
-		}
-
+		
 		$this->debug_messages( __( 'Shipping Class: '.implode(', ', $all_shipping_class_found).'<br>'.json_encode($package), 'woocommerce-shipping-afr' ) );
 		
 		return $final_calculated_price;

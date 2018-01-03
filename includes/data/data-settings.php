@@ -22,8 +22,7 @@ $mysettings['title']      = array(
 	'default'         => __( 'Advance Flat Rate', 'woocommerce-shipping-afr' ),
 	'desc_tip'        => true
 );
-if($this->weight_factor)
-{
+if($this->weight_factor):
 	$mysettings['calculation_type'] = array(
 		'title'           => __( 'Calculation Type', 'woocommerce-shipping-afr' ),
 		'type'            => 'select',
@@ -34,9 +33,7 @@ if($this->weight_factor)
 			'per_order'   => __( 'Per Order: Charge shipping for comulative weight of all products.', 'woocommerce-shipping-afr' ),
 		)
 	);
-}
-else
-{
+else:
 	$mysettings['calculation_type'] = array(
 		'title'           => __( 'Calculation Type', 'woocommerce-shipping-afr' ),
 		'type'            => 'select',
@@ -48,19 +45,9 @@ else
 			'per_order_min'  => __( 'Per Order: Charge shipping for the most cheap shipping class', 'woocommerce-shipping-afr' ),
 		)
 	);
-}
+endif;
 
 $mysettings['table_rates']['type'] = 'adv_table_rates';
-
-
-if($this->weight_factor)
-{
-	$mysettings['table_rates']['description'] = 'Enter a cost(Excl. tax) or sum, e.g: 10.00';
-}
-else
-{
-	$mysettings['table_rates']['description'] = 'Enter a cost(Excl. tax) or sum for each shiiping class against each city, e.g: 10.00*[qty]<br><br>Use [qty] for the number of items.';
-}
 
 
 return $mysettings;

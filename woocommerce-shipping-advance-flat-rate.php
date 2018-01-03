@@ -49,9 +49,6 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 	 * @version 1.0.1
 	 */
 	function deactivate_wc_shipping_afr() {
-		//global $wpdb;
-		//$wpdb->query( "DELETE from {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE method_id='afr' ") ;
-
 		delete_option( 'woocommerce_afr_show_upgrade_notice');
 	}
 	register_deactivation_hook( __FILE__, 'deactivate_wc_shipping_afr' );
@@ -89,7 +86,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 		 */
 		public function __construct() {
 			
-			if ( class_exists( 'WC_Shipping_Method' ) ) {
+			if ( class_exists( 'WC_Shipping_Method' ) ):
 				add_action( 'admin_init', array( $this, 'install' ), 5 );
 				add_action( 'init', array( $this, 'load_textdomain' ) );
 				add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'plugin_links' ) );
@@ -100,9 +97,9 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 				add_action( 'admin_notices', array( $this, 'upgrade_notice' ) );
 				add_action( 'wp_ajax_afr_dismiss_upgrade_notice', array( $this, 'afr_dismiss_upgrade_notice' ) );
 				add_action( 'wp_ajax_nopriv_afr_dismiss_upgrade_notice', array( $this, 'afr_dismiss_upgrade_notice' ) );
-			} else {
+			else:
 				add_action( 'admin_notices', array( $this, 'wc_deactivated' ) );
-			}
+			endif;
 		}
 
 		/**
@@ -149,14 +146,11 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 		 * @version 1.0.1
 		 */
 		public function install() {
-			if ( version_compare( WP_VERSION, WC_SHIPPING_AFR_MINIMUM_WP_VERSION, '<' )  ) 
-			{
+			if ( version_compare( WP_VERSION, WC_SHIPPING_AFR_MINIMUM_WP_VERSION, '<' )  ) :
 				add_action( 'admin_notices', array( $this, 'wp_incompitable_version' ) );
-			}
-			else if( version_compare( WC_VERSION, WC_SHIPPING_AFR_MINIMUM_WC_VERSION, '<' ) )
-			{
+			elseif ( version_compare( WC_VERSION, WC_SHIPPING_AFR_MINIMUM_WC_VERSION, '<' ) ):
 				add_action( 'admin_notices', array( $this, 'wc_incompitable_version' ) );
-			}
+			endif;
 
 			return true;
 		}
@@ -226,9 +220,9 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 		public function upgrade_notice() {
 			$show_notice = get_option( 'woocommerce_afr_show_upgrade_notice' );
 
-			if ( 'yes' !== $show_notice ) {
+			if ( 'yes' !== $show_notice ):
 				return;
-			}
+			endif;
 
 			$query_args = array( 'page' => 'wc-settings', 'tab' => 'shipping' );
 			$zones_admin_url = add_query_arg( $query_args, get_admin_url() . 'admin.php' );
@@ -254,8 +248,6 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 		 */
 		public function afr_dismiss_upgrade_notice() {
 			update_option( 'woocommerce_afr_show_upgrade_notice', 'no' );
-			//echo get_option( 'woocommerce_afr_show_upgrade_notice' );
-
 		}
 	}
 

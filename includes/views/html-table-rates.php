@@ -7,7 +7,7 @@
 */?>
 
 <tr valign="top" id="packing_options">
-	<th scope="row" class="titledesc"><span class="woocommerce-help-tip" data-tip="<?php if($this->weight_factor){echo 'Enter a cost for each weight class against each city.<br>e.g: 10.00';}else{echo 'Enter a cost for each shipping class against each city.<br>e.g: 10.00 OR 10.00*[qty]<br><br>Use [qty] to consider the quanitity of item in the cart.';}?>"></span> <label><?php _e( 'Shipping Prices', 'woocommerce-shipping-afr' );?></label><br><small><?php _e( (($this->weight_factor)?'Weight Base':'Shipping Classes'), 'woocommerce-shipping-afr' );?></small></th>
+	<th scope="row" class="titledesc"><span class="woocommerce-help-tip" data-tip="<?php if($this->weight_factor): echo 'Enter a cost for each weight class against each city.<br>e.g: 10.00'; else: echo 'Enter a cost for each shipping class against each city.<br>e.g: 10.00 OR 10.00*[qty]<br><br>Use [qty] to consider the quanitity of item in the cart.'; endif;?>"></span> <label><?php _e( 'Shipping Prices', 'woocommerce-shipping-afr' );?></label><br><small><?php _e( (($this->weight_factor)?'Weight Base':'Shipping Classes'), 'woocommerce-shipping-afr' );?></small></th>
 	<td class="forminp">
 		<style type="text/css">
 			.afr_boxes td{
@@ -38,7 +38,7 @@
 		</style> 
 		<?php 
 		$newrec = ''; 
-		if($this->weight_factor){ ?>
+		if($this->weight_factor): ?>
 		<table class="afr_boxes widefat">
 			<thead>
 				<tr>
@@ -47,17 +47,17 @@
 							<td class="check-column"><input type="checkbox" /></td>\
 							<td><input type="text" size="25" name="tr_city_name[\' + size + \']" required  placeholder="City Name" /></td>\
 							<td class="center"><input type="text" name="tr_no_class[\' + size + \']" required  placeholder="0.00"/></td>\ ';
-						foreach($this->weight_ranges['weight_class'] as $sclass){ 
-							$newrec.='<td class="center"><input type="text"  name="tr_class_'.$this->clean($sclass).'[\' + size + \']" required placeholder="0.00"/></td>\ '; }
+						foreach($this->weight_ranges['weight_class'] as $sclass):
+							$newrec.='<td class="center"><input type="text"  name="tr_class_'.$this->clean($sclass).'[\' + size + \']" required placeholder="0.00"/></td>\ '; endforeach;
 							$newrec.='<td class="center"><input type="checkbox" name="tr_enabled[\' + size + \']" value="on" checked/></td>\
 						</tr>';?>
 
 					<th class="check-column"><input type="checkbox" /></th>
 					<th><?php _e( 'City', 'woocommerce-shipping-afr' ); ?></th>
 					<th class="center"><?php _e( 'Default ('.get_woocommerce_currency_symbol().')', 'woocommerce-shipping-afr' ); ?></th>
-					<?php foreach($this->weight_ranges['weight_class'] as $sclass){?>
+					<?php foreach($this->weight_ranges['weight_class'] as $sclass):?>
 						<th class="center"><?php echo $sclass.' ('.get_woocommerce_currency_symbol().')'; ?></th>
-					<?php }?>
+					<?php endforeach;?>
 					<th class="center"><?php _e( 'Enabled', 'woocommerce-shipping-fedex' ); ?></th>
 				</tr>
 				</tr>
@@ -76,15 +76,15 @@
 					<td class="check-column"><input type="checkbox" disabled readonly /></td>
 					<td><input type="text" size="25" name="tr_city_name[0]"  value="<?php echo $this->table_rates['tr_city_name'][0];?>" readonly required placeholder="City Name" /></td>
 					<td class="center"><input type="text"  name="tr_no_class[0]"  value="<?php echo $this->table_rates['tr_no_class'][0];?>" required placeholder="0.00"/></td>
-					<?php foreach($this->weight_ranges['weight_class'] as $sclass){?>
+					<?php foreach($this->weight_ranges['weight_class'] as $sclass):?>
 						<td class="center"><input type="text"  name="tr_class_<?php echo $this->clean($sclass); ?>[0]" value="<?php  echo $this->table_rates['tr_class_'.$this->clean($sclass)][0];?>" required placeholder="0.00"/></td>
-					<?php }?>
+					<?php endforeach;?>
 					<td class="center"><input type="checkbox" checked disabled readonly/></td>
 				</tr>
 
 
-				<?php if ( $this->table_rates['tr_city_name'] ) {
-						foreach ( $this->table_rates['tr_city_name'] as $key => $trate ) {
+				<?php if ( $this->table_rates['tr_city_name'] ) :
+						foreach ( $this->table_rates['tr_city_name'] as $key => $trate ) :
 							if ( ! is_numeric( $key ) || $key<1 )
 								continue;
 							?>
@@ -92,18 +92,17 @@
 								<td class="check-column"><input type="checkbox" /></td>
 								<td><input type="text" size="25" name="tr_city_name[<?php echo $key; ?>]" value="<?php echo $this->table_rates['tr_city_name'][$key];?>" required placeholder="City Name" /></td>
 								<td class="center"><input type="text"  name="tr_no_class[<?php echo $key; ?>]" value="<?php echo @$this->table_rates['tr_no_class'][$key];?>" required placeholder="0.00"/></td>
-								<?php foreach($this->weight_ranges['weight_class'] as $sclass){?>
+								<?php foreach($this->weight_ranges['weight_class'] as $sclass):?>
 									<td class="center"><input type="text"  name="tr_class_<?php echo $this->clean($sclass); ?>[<?php echo $key; ?>]" value="<?php echo @$this->table_rates['tr_class_'.$this->clean($sclass)][$key];?>" required placeholder="0.00"/></td>
-								<?php }?>
+								<?php endforeach;?>
 								<td class="center"><input type="checkbox" name="tr_enabled[<?php echo $key; ?>]" <?php checked( @$this->table_rates['tr_enabled'][$key], 'on' ); ?> value="on"/></td>
 							</tr>
 							<?php
-						}
-					}?>
-
+						endforeach;
+					endif;?>
 			</tbody>
 		</table>
-		<?php } else { ?>
+		<?php  else : ?>
 		<table class="afr_boxes widefat">
 			<thead>
 				<tr>
@@ -112,17 +111,17 @@
 							<td class="check-column"><input type="checkbox" /></td>\
 							<td><input type="text" size="25" name="tr_city_name[\' + size + \']" required  placeholder="City Name" /></td>\
 							<td class="center"><input type="text" name="tr_no_class[\' + size + \']" required  placeholder="0.00"/></td>\ ';
-						foreach($this->get_def_shipping_classes() as $sclass){ 
-							$newrec.='<td class="center"><input type="text"  name="tr_class_'.$sclass->slug.'[\' + size + \']" required placeholder="0.00"/></td>\ '; }
+						foreach($this->get_def_shipping_classes() as $sclass): 
+							$newrec.='<td class="center"><input type="text"  name="tr_class_'.$sclass->slug.'[\' + size + \']" required placeholder="0.00"/></td>\ '; endforeach;
 							$newrec.='<td class="center"><input type="checkbox" name="tr_enabled[\' + size + \']" value="on" checked/></td>\
 						</tr>';?>
 
 					<th class="check-column"><input type="checkbox" /></th>
 					<th><?php _e( 'City', 'woocommerce-shipping-afr' ); ?></th>
 					<th class="center"><?php _e( 'Default ('.get_woocommerce_currency_symbol().')', 'woocommerce-shipping-afr' ); ?></th>
-					<?php foreach($this->get_def_shipping_classes() as $sclass){?>
+					<?php foreach($this->get_def_shipping_classes() as $sclass):?>
 						<th class="center"><?php echo $sclass->name.' ('.get_woocommerce_currency_symbol().')'; ?></th>
-					<?php }?>
+					<?php endforeach;?>
 					<th class="center"><?php _e( 'Enabled', 'woocommerce-shipping-fedex' ); ?></th>
 				</tr>
 				</tr>
@@ -148,8 +147,8 @@
 				</tr>
 
 
-				<?php if ( $this->table_rates['tr_city_name'] ) {
-						foreach ( $this->table_rates['tr_city_name'] as $key => $trate ) {
+				<?php if ( $this->table_rates['tr_city_name'] ):
+						foreach ( $this->table_rates['tr_city_name'] as $key => $trate ) :
 							if ( ! is_numeric( $key ) || $key<1 )
 								continue;
 							?>
@@ -163,12 +162,12 @@
 								<td class="center"><input type="checkbox" name="tr_enabled[<?php echo $key; ?>]" <?php checked( $this->table_rates['tr_enabled'][$key], 'on' ); ?> value="on"/></td>
 							</tr>
 							<?php
-						}
-					}?>
+						endforeach;
+					endif;?>
 
 			</tbody>
 		</table>
-		<?php } ?>
+		<?php endif; ?>
 
 		<script type="text/javascript">
 
