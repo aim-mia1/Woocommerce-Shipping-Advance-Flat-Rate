@@ -2,7 +2,7 @@
 
 /**
 * Plugin Name: Advance Flat Rate Shipping For WooCommerce
-* Description: AFR Shipping For WooCommerce provides ability to set different shipping rates for shipping classes and cities.
+* Description: AFR Shipping For WooCommerce provides ability to set city wise shipping rates for shipping classes and weight ranges.
 * Author: M Ishtiaq Awan
 * Version: 1.1.0
 * Author URI: https://www.allshorevirtualstaffing.com/resume/?dev_id=740770587&dev_name=Ishtiaq%20A.
