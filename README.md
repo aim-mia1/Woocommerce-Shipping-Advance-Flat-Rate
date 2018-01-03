@@ -2,7 +2,9 @@
 == Description ==
 
 Advance Flat Rate Shipping For WooCommerce provides ability to set different flat rate shipping cost for different cities in any country. It also allows you to set flate rate shipping costs for different Shipping Classes and Weights for each city.  
+
 = Shipping Classes = 
+
 By default it supports shipping classes based flat rates for cities and you set two different calculation types:
 1) per_item 
 	Charge shipping for each shipping class individually.
@@ -11,11 +13,14 @@ By default it supports shipping classes based flat rates for cities and you set 
 	Most Cheap: Charge shipping for most cheap shipping class from cart items.
 
 = Weight Based =
+
 For weight based shipping you need to enable this from settings pages, and you will see a weight clasification section when you do so. You can create any number for weight classes with customized min and max weight limit. Here you will have two calculation types aswell but works differently as compared to Shipping Classes:
+
 1) per_item
 	 Charge shipping for each item in the cart individually.
 2) per_order
 	Charge shipping for comulative weight of all products in the cart
+
 
 == Installation ==
 
