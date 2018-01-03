@@ -17,7 +17,7 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 	*
 	* @access private
 	* @since 1.0.0
-	* @var array shipping classes
+	* @var array shipping classes, bool use weight based shipping
 	*/
 	private $shipping_class;
 	private $weight_factor;
@@ -337,15 +337,15 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 	/**
 	* get weight class
 	*
-	* @access public
+	* @access private
 	* @since 1.1.0
 	* @version 1.1.0
 	* @param weight
 	* @return user defined weight class index
 	*/
-	function get_weight_class($weight)
+	private function get_weight_class($weight)
 	{
-		$weight_class_index=0;
+		$weight_class_index=-1;
 		if(!empty($weight) && $weight>0)
 		{
 			foreach($this->weight_ranges['weight_class'] as $key => $value)
@@ -360,17 +360,66 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 
 		return $weight_class_index;
 	}
+
 	/**
 	* Calculate Shipping wrt Weights and weight classes
 	*
-	* @access public
+	* @access private
+	* @since 1.1.0
+	* @version 1.1.0
+	* @param Weight class index
+	* @return available price for given weight 
+	*/
+	private function get_price_for_weight($weight_class_index,$cityIndex)
+	{
+		$available_price = 0;
+		if($weight_class_index>=0)
+		{
+			$weight_class = 'tr_class_'.$this->clean($this->weight_ranges['weight_class'][$weight_class_index]);
+			if(isset($this->table_rates[$weight_class][$cityIndex]) && $this->table_rates[$weight_class][$cityIndex]>-1)
+			{
+				$available_price =  $this->table_rates[$weight_class][$cityIndex];
+			}
+			else if(isset($this->table_rates['tr_no_class'][$cityIndex]) && $this->table_rates['tr_no_class'][$cityIndex]>-1)
+			{
+				$available_price =  $this->table_rates['tr_no_class'][$cityIndex];
+			}
+			else if(isset($this->table_rates[$weight_class][0]) && $this->table_rates[$weight_class][0]>-1)
+			{
+				$available_price =  $this->table_rates[$weight_class][0];
+			}
+			else if(isset($this->table_rates['tr_no_class'][0]) && $this->table_rates['tr_no_class'][0]>-1)
+			{
+				$available_price =  $this->table_rates['tr_no_class'][0];
+			}
+		}
+		else 
+		{
+			$weight_class = 'tr_no_class';
+			if(isset($this->table_rates[$weight_class][$cityIndex]) && $this->table_rates[$weight_class][$cityIndex]>-1)
+			{
+				$available_price =  $this->table_rates[$weight_class][$cityIndex];
+			}
+			else if(isset($this->table_rates[$weight_class][0]) && $this->table_rates[$weight_class][0]>-1)
+			{
+				$available_price =  $this->table_rates[$weight_class][0];
+			}
+		}
+
+		return $available_price;
+	}
+
+	/**
+	* Weight Based Shipping wrt Weights and weight classes
+	*
+	* @access private
 	* @since 1.1.0
 	* @version 1.1.0
 	* @param package, city
 	* @return integer final shipping cost 
 	*/
-	public function weight_based($package,$cityIndex) {
-		$allClassPrice=0;
+	private function weight_based($package,$cityIndex) {
+		
 		$total_weight=0;
 		$total_price=0;
 
@@ -379,15 +428,13 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 
 		foreach ( $package['contents'] as $item_id => $values ) 
 		{
+			$cart_item_sub_weight=0;
 
 			$cart_item_weight = $values['data']->get_weight();
-			$cart_item_sub_weight = ($cart_item_weight * $values['quantity']);
+			if($cart_item_weight>0)
+				$cart_item_sub_weight = ($cart_item_weight * $values['quantity']);
 
 			$weight_class_index = $this->get_weight_class($cart_item_sub_weight);
-			$weight_class = $this->weight_ranges['weight_class'][$weight_class_index];
-			$all_weight_class_found[] = $weight_class.':'.$cart_item_sub_weight;
-
-
 
 			if($this->calculation_type == 'per_order')
 			{
@@ -395,26 +442,25 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 			}
 			else
 			{
-				$total_price +=  $this->table_rates['tr_class_'.$this->clean($weight_class)][$cityIndex];
+				$total_price += $this->get_price_for_weight($weight_class_index,$cityIndex);		
 			}
 
-		}
+			$all_weight_class_found[] = $cart_item_sub_weight;
 
-		$final_calculated_price=0;
+		}
 
 		if($this->calculation_type == 'per_order')
 		{
+			$total_price = 0;
+
 			$weight_class_index = $this->get_weight_class($total_weight);
-			$weight_class = $this->weight_ranges['weight_class'][$weight_class_index];
-			$final_calculated_price=$this->table_rates['tr_class_'.$this->clean($weight_class)][$cityIndex];
-		}
-		else 
-		{
-			$final_calculated_price=$total_price;
+
+			$total_price = $this->get_price_for_weight($weight_class_index,$cityIndex);
 		}
 
-		$this->debug_messages( __( 'Shipping Class: '.implode(', ', $all_weight_class_found), 'woocommerce-shipping-afr' ) );
-		$this->debug_messages( __( 'Package Details: '.json_encode($package), 'woocommerce-shipping-afr' ) );
+		$final_calculated_price=$total_price;
+
+		$this->debug_messages( __( 'Weights: '.implode(', ', $all_weight_class_found).'<br>Package Details: '.json_encode($package), 'woocommerce-shipping-afr' ) );
 
 		return $final_calculated_price;
 	}
@@ -423,13 +469,13 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 	/**
 	* Calculate Shipping wrt Shipping Classes
 	*
-	* @access public
+	* @access private
 	* @since 1.1.0
 	* @version 1.1.0
 	* @param package, city
 	* @return integer final shipping cost 
 	*/
-	public function shipping_classes_based($package,$cityIndex) {
+	private function shipping_classes_based($package,$cityIndex) {
 		$allClassPrice=0;
 		$minClassPrice=0;
 		$maxClassPrice=0;
@@ -444,21 +490,44 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 			$all_shipping_class_found[] = $cart_item_shipping_class;
 
 			$priceForClass = 0;
-
-			if(!empty($cart_item_shipping_class) 
-				&& isset($this->table_rates['tr_class_'.$cart_item_shipping_class][$cityIndex]) 
-				&& $this->table_rates['tr_class_'.$cart_item_shipping_class][$cityIndex]>-1)
+			if(!empty($cart_item_shipping_class))
 			{
-				$priceForClass = $this->table_rates['tr_class_'.$cart_item_shipping_class][$cityIndex];
-			}
-			else if(isset($this->table_rates['tr_no_class'][$cityIndex]) && $this->table_rates['tr_no_class'][$cityIndex]>-1)
-			{
-				$priceForClass = $this->table_rates['tr_no_class'][$cityIndex];
+				if( isset($this->table_rates['tr_class_'.$cart_item_shipping_class][$cityIndex]) 
+					&& $this->table_rates['tr_class_'.$cart_item_shipping_class][$cityIndex]>-1)
+				{
+					$priceForClass = $this->table_rates['tr_class_'.$cart_item_shipping_class][$cityIndex];
+				}
+				else if(isset($this->table_rates['tr_no_class'][$cityIndex]) 
+						&& $this->table_rates['tr_no_class'][$cityIndex]>-1)
+				{
+					$priceForClass = $this->table_rates['tr_no_class'][$cityIndex];
+				}
+				else if(isset($this->table_rates['tr_class_'.$cart_item_shipping_class][0]) 
+						&& $this->table_rates['tr_class_'.$cart_item_shipping_class][0]>-1)
+				{
+					$priceForClass = $this->table_rates['tr_class_'.$cart_item_shipping_class][0];	
+				}
+				else if(isset($this->table_rates['tr_no_class'][0]) 
+						&& $this->table_rates['tr_no_class'][0]>-1)
+				{
+					$priceForClass = $this->table_rates['tr_no_class'][0];	
+				}
 			}
 			else
 			{
-				$priceForClass = 0;	
+				if(isset($this->table_rates['tr_no_class'][$cityIndex]) 
+						&& $this->table_rates['tr_no_class'][$cityIndex]>-1)
+				{
+					$priceForClass = $this->table_rates['tr_no_class'][$cityIndex];
+				}
+				else if(isset($this->table_rates['tr_no_class'][0]) 
+						&& $this->table_rates['tr_no_class'][0]>-1)
+				{
+					$priceForClass = $this->table_rates['tr_no_class'][0];
+				}
 			}
+
+
 
 			$priceForClass = str_replace(" ", "", $priceForClass);
 			$priceForClassArr = explode("*", $priceForClass);
@@ -509,22 +578,21 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 			$final_calculated_price=$allClassPrice;
 		}
 
-		$this->debug_messages( __( 'Shipping Class: '.implode(', ', $all_shipping_class_found), 'woocommerce-shipping-afr' ) );
-		$this->debug_messages( __( 'Package Details: '.json_encode($package), 'woocommerce-shipping-afr' ) );
-
+		$this->debug_messages( __( 'Shipping Class: '.implode(', ', $all_shipping_class_found).'<br>'.json_encode($package), 'woocommerce-shipping-afr' ) );
+		
 		return $final_calculated_price;
 	}
 	
 	/**
 	* clean strings
 	*
-	* @access public
+	* @access private
 	* @since 1.1.0
 	* @version 1.1.0
 	* @param $string
 	* @return clean string: without special characters 
 	*/
-	public function clean($string) {   
+	private function clean($string) {   
 		$string = str_replace(' ', '-', $string); // Replaces all spaces with hyphens.
 	   	$string = preg_replace('/[^A-Za-z0-9\-]/', '', $string); // Removes special chars.
 
