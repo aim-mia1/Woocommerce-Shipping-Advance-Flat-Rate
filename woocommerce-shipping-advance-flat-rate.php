@@ -24,7 +24,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 {
  
  	global $wp_version;
- 	
+
 	define( 'WC_SHIPPING_AFR_VERSION', '1.1.0' );
 	define( 'WC_SHIPPING_AFR_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 	define( 'WC_SHIPPING_AFR_MINIMUM_WP_VERSION', '2.6.0' );
@@ -183,8 +183,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 		public function plugin_links( $links ) {
 			$plugin_links = array(
 				'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=shipping&section=afr' ) . '">' . __( 'Settings', 'woocommerce-shipping-afr' ) . '</a>',
-				'<a href="https://support.datumsquare.com/">' . __( 'Support', 'woocommerce-shipping-afr' ) . '</a>',
-				'<a href="https://docs.datumsquare.com/document/afr/">' . __( 'Docs', 'woocommerce-shipping-aft' ) . '</a>',
+				'<a href="http://www.datumsquare.com/#contact">' . __( 'Support', 'woocommerce-shipping-afr' ) . '</a>',
 			);
 
 			return array_merge( $plugin_links, $links );
