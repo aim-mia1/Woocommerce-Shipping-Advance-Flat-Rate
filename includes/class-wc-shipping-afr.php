@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 *
 * @inherits  WC_Shipping_Method
 * @since 1.0.0
-* @version 1.0.1
+* @version 1.1.0
 */
 class WC_Shipping_AFR extends WC_Shipping_Method {
 
@@ -20,7 +20,7 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 	* @var array shipping classes
 	*/
 	private $shipping_class;
-
+	private $weight_factor;
 	/**
 	* Constructor
 	*
@@ -38,6 +38,7 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 		$this->enabled = isset( $this->settings['enabled'] ) ? $this->settings['enabled'] : 'yes';
         $this->title = isset( $this->settings['title'] ) ? $this->settings['title'] : $this->method_title;
 
+		$this->weight_factor		= ( ( $bool = $this->get_option( 'weight_factor' ) ) && $bool === 'yes' );
 
 		$my_wc_shipping = new WC_Shipping();
 		$this->shipping_class = $my_wc_shipping->get_shipping_classes();
@@ -76,7 +77,7 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 	*
 	* @access public
 	* @since 1.0.0
-	* @version 1.0.1
+	* @version 1.1.0
 	* @param
 	*/
 	public function init_form_fields() {
@@ -91,6 +92,17 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 				
 				'description'     => __( 'Enable debug mode to show debugging information on the cart/checkout.', 'woocommerce-shipping-afr' )
 			),
+			'weight_factor' 	=> array(
+				'title' 		=>__( 'Weight Base Shipping', 'woocommerce-shipping-afr'  ),
+				'label'         => __( 'Enable weight base shipping', 'woocommerce-shipping-afr' ),
+				'type'          => 'checkbox',
+				'default'       => 'no',
+				
+				'description'   => __( 'Enable weight base shipping to manage flat rate shipping with respect to different weight .', 'woocommerce-shipping-afr' )
+			),
+			'weight_ranges' 	=>  array(
+				'type'          => 'adv_weight_ranges'
+			),
 		);
 	}
 
@@ -104,9 +116,11 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 	*/
 	private function set_settings() {
 
-		$this->debug                      = ( ( $bool = $this->get_option( 'debug' ) ) && $bool === 'yes' );
-		$this->table_rates                      = $this->get_option( 'table_rates', array( ));
-		$this->calculation_type                      = $this->get_option( 'calculation_type', 'per_item');
+		$this->debug 				= ( ( $bool = $this->get_option( 'debug' ) ) && $bool === 'yes' );
+		$this->table_rates 			= $this->get_option( 'table_rates', array( ));
+		$this->calculation_type		= $this->get_option( 'calculation_type', 'per_item');
+
+		$this->weight_ranges 		= $this->get_option( 'weight_ranges', array( ));
 
 		if(!isset($this->table_rates['tr_city_name'][0]))
 			$this->table_rates['tr_city_name'][0]='Default';
@@ -115,9 +129,27 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 		if(!isset($this->table_rates['tr_enabled'][0]))
 			$this->table_rates['tr_enabled'][0]='on';
 
-		foreach($this->get_def_shipping_classes() as $sclass){
-			if(!isset($this->table_rates['tr_class_'.$sclass->slug][0]))
-				$this->table_rates['tr_class_'.$sclass->slug][0]='';
+		if($this->weight_factor)
+		{
+			foreach($this->weight_ranges['weight_class'] as $sclass){
+				if(!isset($this->table_rates['tr_class_'.$this->clean($sclass)][0]))
+					$this->table_rates['tr_class_'.$this->clean($sclass)][0]='';
+			}
+
+		}
+		else
+		{
+			foreach($this->get_def_shipping_classes() as $sclass){
+				if(!isset($this->table_rates['tr_class_'.$sclass->slug][0]))
+					$this->table_rates['tr_class_'.$sclass->slug][0]='';
+			}
+		}
+
+		if(!isset($this->weight_ranges['weight_class']))
+		{
+			$this->weight_ranges['weight_class'] = array('Small','Medium','Large');
+			$this->weight_ranges['min_weight']  = array(10,20,50);
+			$this->weight_ranges['max_weight']  = array(20,50,100);
 		}
 	}
 
@@ -161,6 +193,19 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 		}
 
 	}
+	
+	/**
+	* generate_adv_weight_ranges_html function.
+	*
+	* @access public
+	* @since 1.1.0
+	*/
+	public function generate_adv_weight_ranges_html() {
+		$current_weight_unit = get_option('woocommerce_weight_unit');
+		ob_start();
+		include( 'views/html-weight-ranges.php' );
+		return ob_get_clean();
+	}
 
 	
 	/**
@@ -176,26 +221,51 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 		return ob_get_clean();
 	}
 	/**
-	* validate_box_packing_field function.
+	* validate_weight_ranges_field function.
+	*
+	* @access public
+	* @since 1.1.0
+	* @param mixed $key
+	*/
+	public function validate_adv_weight_ranges_field( $key ) {
+		$my_weight_ranges['weight_class'] = isset( $_POST['weight_class'] ) ? $_POST['weight_class'] : array();
+		$my_weight_ranges['min_weight'] = isset( $_POST['min_weight'] ) ? $_POST['min_weight'] : array();
+		$my_weight_ranges['max_weight'] = isset( $_POST['max_weight'] ) ? $_POST['max_weight'] : array();
+
+		return $my_weight_ranges;
+	}
+
+	
+	/**
+	* validate_table_rates_field function.
 	*
 	* @access public
 	* @since 1.0.0
+	* @version 1.1.0
 	* @param mixed $key
 	*/
 	public function validate_adv_table_rates_field( $key ) {
 		$my_table_rates['tr_city_name']       = isset( $_POST['tr_city_name'] ) ? $_POST['tr_city_name'] : array();
 		$my_table_rates['tr_no_class']      = isset( $_POST['tr_no_class'] ) ? $_POST['tr_no_class'] : array();
 
-		foreach($this->get_def_shipping_classes() as $defclasses)
+		if($this->weight_factor)
 		{
-			$my_table_rates['tr_class_'.$defclasses->slug] = isset( $_POST['tr_class_'.$defclasses->slug] ) ? $_POST['tr_class_'.$defclasses->slug] : array();
+			foreach($this->weight_ranges['weight_class'] as $defclasses)
+			{
+				$my_table_rates['tr_class_'.$this->clean($defclasses)] = isset( $_POST['tr_class_'.$this->clean($defclasses)] ) ? $_POST['tr_class_'.$this->clean($defclasses)] : array();
+			}
+		}
+		else
+		{
+			foreach($this->get_def_shipping_classes() as $defclasses)
+			{
+				$my_table_rates['tr_class_'.$defclasses->slug] = isset( $_POST['tr_class_'.$defclasses->slug] ) ? $_POST['tr_class_'.$defclasses->slug] : array();
+			}
 		}
 
 		$my_table_rates['tr_enabled']    = isset( $_POST['tr_enabled'] ) ? $_POST['tr_enabled'] : array();
 		return $my_table_rates;
 	}
-
-	
 	/**
 	* is available function.
 	*
@@ -217,20 +287,19 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 	*
 	* @access public
 	* @since 1.0.0
-	* @version 1.0.1
+	* @version 1.1.0
 	* @param $package product deatils, shipping details
 	* @return shipping price
 	*/
 	public function calculate_shipping( $package = array() ) {
 		
-		if ( empty($package['destination']['country']) || empty($package['destination']['city'] ) ) {
-			return false;
-		}
+		// check if country and city is entered by customer
+		//if ( empty($package['destination']['country']) || empty($package['destination']['city'] ) ) {
+		//	return false;
+		//}
 	
-		$this->package = $package;
-	
+		// Find city index 
 		$cityIndex=0;
-
 		foreach($this->table_rates['tr_city_name'] as $citykey => $cityname)
 		{
 			if( strtolower($cityname) == strtolower($package['destination']['city']) )
@@ -243,10 +312,127 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 			}
 		}
 
+		if($this->weight_factor)
+		{
+			$final_calculated_price = $this->weight_based($package,$cityIndex);
+		}
+		else
+		{
+			$final_calculated_price = $this->shipping_classes_based($package,$cityIndex);
+		}
+
+		$this->debug_messages( __( 'AFR debug mode is on - to hide these messages, turn debug mode off in the settings.', 'woocommerce-shipping-afr' ) );
+
+		if($final_calculated_price>0)
+		{
+			$mrate = array(
+		        'id' => $this->id,
+		        'label' => $this->title,
+		        'cost' => $final_calculated_price
+		    );
+		     
+		    $this->add_rate( $mrate );
+		}
+	}
+	/**
+	* get weight class
+	*
+	* @access public
+	* @since 1.1.0
+	* @version 1.1.0
+	* @param weight
+	* @return user defined weight class index
+	*/
+	function get_weight_class($weight)
+	{
+		$weight_class_index=0;
+		if(!empty($weight) && $weight>0)
+		{
+			foreach($this->weight_ranges['weight_class'] as $key => $value)
+			{
+				if($this->weight_ranges['min_weight'][$key] <= $weight && $weight < $this->weight_ranges['max_weight'][$key])
+				{
+					$weight_class_index=$key;
+					break;
+				}
+			}
+		}
+
+		return $weight_class_index;
+	}
+	/**
+	* Calculate Shipping wrt Weights and weight classes
+	*
+	* @access public
+	* @since 1.1.0
+	* @version 1.1.0
+	* @param package, city
+	* @return integer final shipping cost 
+	*/
+	public function weight_based($package,$cityIndex) {
+		$allClassPrice=0;
+		$total_weight=0;
+		$total_price=0;
+
+
+		$all_weight_class_found = array();
+
+		foreach ( $package['contents'] as $item_id => $values ) 
+		{
+
+			$cart_item_weight = $values['data']->get_weight();
+			$cart_item_sub_weight = ($cart_item_weight * $values['quantity']);
+
+			$weight_class_index = $this->get_weight_class($cart_item_sub_weight);
+			$weight_class = $this->weight_ranges['weight_class'][$weight_class_index];
+			$all_weight_class_found[] = $weight_class.':'.$cart_item_sub_weight;
+
+
+
+			if($this->calculation_type == 'per_order')
+			{
+				$total_weight += $cart_item_sub_weight;
+			}
+			else
+			{
+				$total_price +=  $this->table_rates['tr_class_'.$this->clean($weight_class)][$cityIndex];
+			}
+
+		}
+
+		$final_calculated_price=0;
+
+		if($this->calculation_type == 'per_order')
+		{
+			$weight_class_index = $this->get_weight_class($total_weight);
+			$weight_class = $this->weight_ranges['weight_class'][$weight_class_index];
+			$final_calculated_price=$this->table_rates['tr_class_'.$this->clean($weight_class)][$cityIndex];
+		}
+		else 
+		{
+			$final_calculated_price=$total_price;
+		}
+
+		$this->debug_messages( __( 'Shipping Class: '.implode(', ', $all_weight_class_found), 'woocommerce-shipping-afr' ) );
+		$this->debug_messages( __( 'Package Details: '.json_encode($package), 'woocommerce-shipping-afr' ) );
+
+		return $final_calculated_price;
+	}
+
+
+	/**
+	* Calculate Shipping wrt Shipping Classes
+	*
+	* @access public
+	* @since 1.1.0
+	* @version 1.1.0
+	* @param package, city
+	* @return integer final shipping cost 
+	*/
+	public function shipping_classes_based($package,$cityIndex) {
 		$allClassPrice=0;
 		$minClassPrice=0;
 		$maxClassPrice=0;
-		$avgClassPrice=0;
 
 		$sclasses_index = 0;
 
@@ -274,6 +460,20 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 				$priceForClass = 0;	
 			}
 
+			$priceForClass = str_replace(" ", "", $priceForClass);
+			$priceForClassArr = explode("*", $priceForClass);
+
+			if(strtolower(@$priceForClassArr[1]) == '[qty]' && is_numeric($priceForClassArr[0]))
+			{
+				$priceForClass = $priceForClassArr[0] * $values['quantity'];
+			}
+			else if(is_numeric($priceForClassArr[0]))
+			{
+				$priceForClass = $priceForClassArr[0];
+			}
+			else
+				$priceForClass=0;
+
 			$allClassPrice += $priceForClass;
 
 			if($sclasses_index==0)
@@ -285,6 +485,7 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 			{
 				if($priceForClass<$minPriceClass)
 					$minPriceClass = $priceForClass;
+
 				if($priceForClass>$maxPriceClass)
 					$maxPriceClass = $priceForClass;
 			}
@@ -292,15 +493,10 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 			$sclasses_index++;
 		}
 
-		$avgClassPrice = round($allClassPrice / $sclasses_index,2);
 
 		$final_calculated_price=0;
 
-		if($this->calculation_type == 'per_item')
-		{
-			$final_calculated_price=$allClassPrice;
-		}
-		else if($this->calculation_type == 'per_order_max')
+		if($this->calculation_type == 'per_order_max')
 		{
 			$final_calculated_price=$maxPriceClass;
 		}
@@ -309,21 +505,29 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 			$final_calculated_price=$minPriceClass;			
 		}
 		else 
-		{//per_order_avg
-			$final_calculated_price=$avgClassPrice;
+		{
+			$final_calculated_price=$allClassPrice;
 		}
 
-		$this->debug_messages( __( 'AFR debug mode is on - to hide these messages, turn debug mode off in the settings.', 'woocommerce-shipping-afr' ) );
 		$this->debug_messages( __( 'Shipping Class: '.implode(', ', $all_shipping_class_found), 'woocommerce-shipping-afr' ) );
 		$this->debug_messages( __( 'Package Details: '.json_encode($package), 'woocommerce-shipping-afr' ) );
 
-		$mrate = array(
-	        'id' => $this->id,
-	        'label' => $this->title,
-	        'cost' => $final_calculated_price
-	    );
-	     
-	    $this->add_rate( $mrate );
+		return $final_calculated_price;
+	}
+	
+	/**
+	* clean strings
+	*
+	* @access public
+	* @since 1.1.0
+	* @version 1.1.0
+	* @param $string
+	* @return clean string: without special characters 
+	*/
+	public function clean($string) {   
+		$string = str_replace(' ', '-', $string); // Replaces all spaces with hyphens.
+	   	$string = preg_replace('/[^A-Za-z0-9\-]/', '', $string); // Removes special chars.
 
+	   	return preg_replace('/-+/', '-', $string); // Replaces multiple hyphens with single one.
 	}
 }
