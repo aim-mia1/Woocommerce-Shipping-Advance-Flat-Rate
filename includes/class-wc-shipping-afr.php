@@ -224,11 +224,51 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 	* @param mixed $key
 	*/
 	public function validate_adv_weight_ranges_field( $key ) {
-		$my_weight_ranges['weight_class'] = isset( $_POST['weight_class'] ) ? $_POST['weight_class'] : array();
-		$my_weight_ranges['min_weight'] = isset( $_POST['min_weight'] ) ? $_POST['min_weight'] : array();
-		$my_weight_ranges['max_weight'] = isset( $_POST['max_weight'] ) ? $_POST['max_weight'] : array();
 
-		return $my_weight_ranges;
+		$new_weight_ranges = array();
+
+		$new_weight_classes = isset( $_POST['weight_class'] ) ? $_POST['weight_class'] : array();
+		$new_min_weights = isset( $_POST['min_weight'] ) ? $_POST['min_weight'] : array();
+		$new_max_weights = isset( $_POST['max_weight'] ) ? $_POST['max_weight'] : array();
+
+		foreach ($new_weight_classes as $key => $value):
+			//Weight Class validation
+			$safe_class =  $value;
+
+			if ( strlen( $safe_class ) > 32) 
+			  $safe_class = substr( $safe_class, 0, 32 );
+			//Weight Class Sanitization
+			$weight_class = sanitize_text_field( $safe_class );
+
+			$new_weight_ranges['weight_class'][] = $weight_class;
+
+			//Min Weight validation
+			$safe_min = floatval( $new_min_weights[$key] );
+			if ( ! $safe_min  && $safe_min!='0')
+			  $safe_min = '';
+
+			if ( strlen( $safe_min ) > 11 ) 
+			  $safe_min = substr( $safe_min, 0, 11 );
+			//Min Weight Sanitization
+			$min_weight = sanitize_text_field( $safe_min );
+
+			$new_weight_ranges['min_weight'][] = $min_weight;
+
+			//Max Weight validation
+			$safe_max = floatval( $new_max_weights[$key] );
+			if ( ! $safe_max  && $safe_max!='0' )
+			  $safe_max = '';
+
+			if ( strlen( $safe_max ) > 11 ) 
+			  $safe_max = substr( $safe_max, 0, 11 );
+			//Max Weight Sanitization
+			$max_weight = sanitize_text_field( $safe_max );
+
+			$new_weight_ranges['max_weight'][] = $max_weight;
+
+		endforeach;
+
+		return $new_weight_ranges;
 	}
 
 	
@@ -241,21 +281,97 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 	* @param mixed $key
 	*/
 	public function validate_adv_table_rates_field( $key ) {
-		$my_table_rates['tr_city_name']       = isset( $_POST['tr_city_name'] ) ? $_POST['tr_city_name'] : array();
-		$my_table_rates['tr_no_class']      = isset( $_POST['tr_no_class'] ) ? $_POST['tr_no_class'] : array();
 
+		$tr_city_names     = isset( $_POST['tr_city_name'] ) ? $_POST['tr_city_name'] : array();
+		$tr_no_classes      = isset( $_POST['tr_no_class'] ) ? $_POST['tr_no_class'] : array();
+
+		
 		if($this->weight_factor):
 			foreach($this->weight_ranges['weight_class'] as $defclasses):
-				$my_table_rates['tr_class_'.$this->clean($defclasses)] = isset( $_POST['tr_class_'.$this->clean($defclasses)] ) ? $_POST['tr_class_'.$this->clean($defclasses)] : array();
+				${'tr_classes_'.$this->clean($defclasses)} = isset( $_POST['tr_class_'.$this->clean($defclasses)] ) ? $_POST['tr_class_'.$this->clean($defclasses)] : array();
 			endforeach;
 		else:
 			foreach($this->get_def_shipping_classes() as $defclasses):
-				$my_table_rates['tr_class_'.$defclasses->slug] = isset( $_POST['tr_class_'.$defclasses->slug] ) ? $_POST['tr_class_'.$defclasses->slug] : array();
+				${'tr_classes_'.$defclasses->slug} = isset( $_POST['tr_class_'.$defclasses->slug] ) ? $_POST['tr_class_'.$defclasses->slug] : array();
 			endforeach;
 		endif;
 
-		$my_table_rates['tr_enabled']    = isset( $_POST['tr_enabled'] ) ? $_POST['tr_enabled'] : array();
-		return $my_table_rates;
+		$tr_enableds  = isset( $_POST['tr_enabled'] ) ? $_POST['tr_enabled'] : array();
+
+		$new_city_rates = array();
+		//$new_city_rates['tr_no_class']
+		//$new_city_rates['tr_class_']
+		//$new_city_rates['tr_enabled']
+
+		foreach($tr_city_names as $key => $value):
+			//City Name validation
+			$safe_city =  $value;
+
+			if ( strlen( $safe_city ) > 50) 
+			  $safe_city = substr( $safe_city, 0, 50 );
+			//City Name Sanitization
+			$tr_city_name = sanitize_text_field( $safe_city );
+
+			$new_city_rates['tr_city_name'][] = $tr_city_name;
+
+			//Default Shipping validation
+			$safe_default = floatval( $tr_no_classes[$key] );
+			if ( ! $safe_default && $safe_default!='0')
+			  $safe_default = '';
+
+			if ( strlen( $safe_default ) > 11 ) 
+			  $safe_default = substr( $safe_default, 0, 11 );
+			//Default Shipping Sanitization
+			$tr_no_class = sanitize_text_field( $safe_default );
+
+			$new_city_rates['tr_no_class'][] = $tr_no_class;
+
+			if($this->weight_factor):
+				foreach($this->weight_ranges['weight_class'] as $defclasses):
+					//Shipping against weight class  validation
+					$safe_sawc = floatval( ${'tr_classes_'.$this->clean($defclasses)}[$key] );
+					if ( ! $safe_sawc  && $safe_sawc!='0')
+					  $safe_sawc = '';
+
+					if ( strlen( $safe_sawc ) > 11 ) 
+					  $safe_sawc = substr( $safe_sawc, 0, 11 );
+					//Shipping against weight class Sanitization
+					$tr_class_ = sanitize_text_field( $safe_sawc );
+
+					$new_city_rates['tr_class_'.$this->clean($defclasses)][] = $tr_class_;
+				endforeach;
+			else:
+				foreach($this->get_def_shipping_classes() as $defclasses):
+					//Shipping against shipping class  validation
+					$safe_sawc = floatval( ${'tr_classes_'.$defclasses->slug}[$key] );
+					if ( ! $safe_sawc  && $safe_sawc!='0')
+					  $safe_sawc = '';
+
+					if ( strlen( $safe_sawc ) > 11 ) 
+					  $safe_sawc = substr( $safe_sawc, 0, 11 );
+					//Shipping against shipping class Sanitization
+					$tr_class_ = sanitize_text_field( $safe_sawc );
+
+					$new_city_rates['tr_class_'.$defclasses->slug][] = $tr_class_;					
+				endforeach;
+			endif;
+
+
+			//Enabled validation
+			$safe_enabled =  $tr_enableds[$key];
+
+			if ( strlen( $safe_enabled ) > 3) 
+			  $safe_enabled = substr( $safe_enabled, 0, 3 );
+			//Enabled Sanitization
+			$tr_enabled = sanitize_text_field( $safe_enabled );
+
+			$new_city_rates['tr_enabled'][] = $tr_enabled;
+
+		endforeach;
+
+
+
+		return $new_city_rates;
 	}
 	/**
 	* is available function.
@@ -307,8 +423,15 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 		        'cost' => $final_calculated_price
 		    );
 		     
-		    $this->add_rate( $mrate );
+		else:
+			$mrate = array(
+		        'id' => $this->id,
+		        'label' => __( 'Free Shipping', 'woocommerce-shipping-afr' ),
+		        'cost' => 0.00
+		    );
 		endif;
+		
+		$this->add_rate( $mrate );
 	}
 	/**
 	* get weight class
