@@ -299,9 +299,6 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 		$tr_enableds  = isset( $_POST['tr_enabled'] ) ? $_POST['tr_enabled'] : array();
 
 		$new_city_rates = array();
-		//$new_city_rates['tr_no_class']
-		//$new_city_rates['tr_class_']
-		//$new_city_rates['tr_enabled']
 
 		foreach($tr_city_names as $key => $value):
 			//City Name validation
