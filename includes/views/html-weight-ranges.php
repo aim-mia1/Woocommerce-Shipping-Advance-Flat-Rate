@@ -58,9 +58,9 @@
 							?>
 							<tr>
 								<td class="check-column"><input type="checkbox" /></td>
-								<td><input type="text" size="25" name="weight_class[<?php echo $key; ?>]" value="<?php echo $this->weight_ranges['weight_class'][$key];?>" required placeholder="Weight Class" /></td>
-								<td class="center"><input type="number"  name="min_weight[<?php echo $key; ?>]" value="<?php echo $this->weight_ranges['min_weight'][$key];?>" required placeholder="0.00"/></td>
-								<td class="center"><input type="number"  name="max_weight[<?php echo $key; ?>]" value="<?php echo $this->weight_ranges['max_weight'][$key];?>" required placeholder="0.00"/></td>
+								<td><input type="text" size="25" name="weight_class[<?php echo $key; ?>]" value="<?php echo esc_html($this->weight_ranges['weight_class'][$key]);?>" required placeholder="Weight Class" /></td>
+								<td class="center"><input type="number"  name="min_weight[<?php echo $key; ?>]" value="<?php echo esc_html($this->weight_ranges['min_weight'][$key]);?>" required placeholder="0.00"/></td>
+								<td class="center"><input type="number"  name="max_weight[<?php echo $key; ?>]" value="<?php echo esc_html($this->weight_ranges['max_weight'][$key]);?>" required placeholder="0.00"/></td>
 							</tr>
 							<?php
 						endforeach;

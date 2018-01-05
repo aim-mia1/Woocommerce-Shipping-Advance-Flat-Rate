@@ -23,13 +23,12 @@ if ( ! defined( 'WPINC' ) ) {
 if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) 
 {
  
- 	global $wp_version;
+ 	
 
 	define( 'WC_SHIPPING_AFR_VERSION', '1.1.0' );
 	define( 'WC_SHIPPING_AFR_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 	define( 'WC_SHIPPING_AFR_MINIMUM_WP_VERSION', '2.6.0' );
 	define( 'WC_SHIPPING_AFR_MINIMUM_WC_VERSION', '3.2.0' );
-	define( 'WP_VERSION', $wp_version );
 
 	/**
 	 * The code that runs during plugin activation.
@@ -37,10 +36,11 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 	 * @since 1.0.0
 	 *
 	 */
-	function activate_wc_shipping_afr() {
-		add_option( 'woocommerce_afr_show_upgrade_notice','yes');
+	
+	function wc_shipping_afr_activate() {
+		add_option( 'wc_shipping_afr_show_upgrade_notice','yes');
 	}
-	register_activation_hook( __FILE__, 'activate_wc_shipping_afr' );
+	register_activation_hook( __FILE__, 'wc_shipping_afr_activate' );
 
 	/**
 	 * The code that runs during plugin deactivation.
@@ -48,10 +48,10 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 	 * @since 1.0.0
 	 * @version 1.0.1
 	 */
-	function deactivate_wc_shipping_afr() {
-		delete_option( 'woocommerce_afr_show_upgrade_notice');
+	function wc_shipping_afr_deactivate() {
+		delete_option( 'wc_shipping_afr_show_upgrade_notice');
 	}
-	register_deactivation_hook( __FILE__, 'deactivate_wc_shipping_afr' );
+	register_deactivation_hook( __FILE__, 'wc_shipping_afr_deactivate' );
 
 	 
 
@@ -97,6 +97,8 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 				add_action( 'admin_notices', array( $this, 'upgrade_notice' ) );
 				add_action( 'wp_ajax_afr_dismiss_upgrade_notice', array( $this, 'afr_dismiss_upgrade_notice' ) );
 				add_action( 'wp_ajax_nopriv_afr_dismiss_upgrade_notice', array( $this, 'afr_dismiss_upgrade_notice' ) );
+
+				add_filter( 'woocommerce_shipping_calculator_enable_city', '__return_true' );
 			else:
 				add_action( 'admin_notices', array( $this, 'wc_deactivated' ) );
 			endif;
@@ -134,7 +136,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 		 * @return mixed raw html
 		 */
 		public function wp_incompitable_version() {
-			echo '<div class="error"><p>' . sprintf( __( 'WooCommerce Advance Flate Rate Shipping requires %s version %s or greater to be installed and active.', 'woocommerce-shipping-afr' ), '<a href="https://wordpress.org" target="_blank">WordPress</a>',WP_VERSION ) . '</p></div>';
+			echo '<div class="error"><p>' . sprintf( __( 'WooCommerce Advance Flate Rate Shipping requires %s version %s or greater to be installed and active.', 'woocommerce-shipping-afr' ), '<a href="https://wordpress.org" target="_blank">WordPress</a>',WC_SHIPPING_AFR_MINIMUM_WP_VERSION ) . '</p></div>';
 		}
 
 
@@ -146,7 +148,9 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 		 * @version 1.0.1
 		 */
 		public function install() {
-			if ( version_compare( WP_VERSION, WC_SHIPPING_AFR_MINIMUM_WP_VERSION, '<' )  ) :
+			global $wp_version;
+
+			if ( version_compare( $wp_version, WC_SHIPPING_AFR_MINIMUM_WP_VERSION, '<' )  ) :
 				add_action( 'admin_notices', array( $this, 'wp_incompitable_version' ) );
 			elseif ( version_compare( WC_VERSION, WC_SHIPPING_AFR_MINIMUM_WC_VERSION, '<' ) ):
 				add_action( 'admin_notices', array( $this, 'wc_incompitable_version' ) );
@@ -192,7 +196,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 		 *
 		 */
 		public function includes() {
-			include_once( dirname( __FILE__ ) . '/includes/class-wc-shipping-afr.php' );
+			include_once( WC_SHIPPING_AFR_PLUGIN_DIR . '/includes/class-wc-shipping-afr.php' );
 		}
 
 		/**
@@ -218,7 +222,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 		 * @return string raw html/javascript
 		 */
 		public function upgrade_notice() {
-			$show_notice = get_option( 'woocommerce_afr_show_upgrade_notice' );
+			$show_notice = get_option( 'wc_shipping_afr_show_upgrade_notice' );
 
 			if ( 'yes' !== $show_notice ):
 				return;
@@ -247,7 +251,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 		 *
 		 */
 		public function afr_dismiss_upgrade_notice() {
-			update_option( 'woocommerce_afr_show_upgrade_notice', 'no' );
+			update_option( 'wc_shipping_afr_show_upgrade_notice', 'no' );
 		}
 	}
 

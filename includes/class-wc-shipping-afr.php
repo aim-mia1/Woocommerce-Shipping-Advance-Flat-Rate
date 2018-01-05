@@ -378,8 +378,8 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 	* @param
 	*/
 	public function is_available( $package ) {
-		if ( empty( $package['destination']['country']) || empty($package['destination']['city'] ) ) 
-			return false;
+		//if ( empty( $package['destination']['country']) || empty($package['destination']['city'] ) ) 
+		//	return false;
 
 		return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', true, $package );
 	}
@@ -516,7 +516,7 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 			if($this->calculation_type == 'per_order')
 				$total_weight += $cart_item_sub_weight;
 			else
-				$total_price += $this->get_price_for_weight($weight_class_index,$cityIndex);		
+				$total_price += floatval($this->get_price_for_weight($weight_class_index,$cityIndex));		
 			
 			$all_weight_class_found[] = $cart_item_sub_weight;
 
@@ -527,7 +527,7 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 
 			$weight_class_index = $this->get_weight_class($total_weight);
 
-			$total_price = $this->get_price_for_weight($weight_class_index,$cityIndex);
+			$total_price = floatval($this->get_price_for_weight($weight_class_index,$cityIndex));
 		endif;
 
 		$final_calculated_price=$total_price;
@@ -629,7 +629,8 @@ class WC_Shipping_AFR extends WC_Shipping_Method {
 	* @param $string
 	* @return clean string: without special characters 
 	*/
-	private function clean($string) {   
+	private function clean($string) {
+		$string = esc_html($string); 
 		$string = str_replace(' ', '-', $string); // Replaces all spaces with hyphens.
 	   	$string = preg_replace('/[^A-Za-z0-9\-]/', '', $string); // Removes special chars.
 

@@ -74,10 +74,10 @@
 
 				<tr>
 					<td class="check-column"><input type="checkbox" disabled readonly /></td>
-					<td><input type="text" size="25" name="tr_city_name[0]"  value="<?php echo $this->table_rates['tr_city_name'][0];?>" readonly required placeholder="City Name" /></td>
-					<td class="center"><input type="text"  name="tr_no_class[0]"  value="<?php echo $this->table_rates['tr_no_class'][0];?>" required placeholder="0.00"/></td>
+					<td><input type="text" size="25" name="tr_city_name[0]"  value="<?php echo esc_html($this->table_rates['tr_city_name'][0]);?>" readonly required placeholder="City Name" /></td>
+					<td class="center"><input type="text"  name="tr_no_class[0]"  value="<?php echo esc_html($this->table_rates['tr_no_class'][0]);?>" required placeholder="0.00"/></td>
 					<?php foreach($this->weight_ranges['weight_class'] as $sclass):?>
-						<td class="center"><input type="text"  name="tr_class_<?php echo $this->clean(esc_html($sclass)); ?>[0]" value="<?php  echo esc_html($this->table_rates['tr_class_'.$this->clean(esc_html($sclass))][0]);?>" required placeholder="0.00"/></td>
+						<td class="center"><input type="text"  name="tr_class_<?php echo $this->clean($sclass); ?>[0]" value="<?php  echo esc_html($this->table_rates['tr_class_'.$this->clean($sclass)][0]);?>" required placeholder="0.00"/></td>
 					<?php endforeach;?>
 					<td class="center"><input type="checkbox" checked disabled readonly/></td>
 				</tr>
@@ -93,7 +93,7 @@
 								<td><input type="text" size="25" name="tr_city_name[<?php echo $key; ?>]" value="<?php echo esc_html($this->table_rates['tr_city_name'][$key]);?>" required placeholder="City Name" /></td>
 								<td class="center"><input type="text"  name="tr_no_class[<?php echo $key; ?>]" value="<?php echo @esc_html($this->table_rates['tr_no_class'][$key]);?>" required placeholder="0.00"/></td>
 								<?php foreach($this->weight_ranges['weight_class'] as $sclass):?>
-									<td class="center"><input type="text"  name="tr_class_<?php echo $this->clean($sclass); ?>[<?php echo $key; ?>]" value="<?php echo @esc_html($this->table_rates['tr_class_'.$this->clean(esc_html($sclass))][$key]);?>" required placeholder="0.00"/></td>
+									<td class="center"><input type="text"  name="tr_class_<?php echo $this->clean($sclass); ?>[<?php echo $key; ?>]" value="<?php echo @esc_html($this->table_rates['tr_class_'.$this->clean($sclass)][$key]);?>" required placeholder="0.00"/></td>
 								<?php endforeach;?>
 								<td class="center"><input type="checkbox" name="tr_enabled[<?php echo $key; ?>]" <?php checked( @$this->table_rates['tr_enabled'][$key], 'on' ); ?> value="on"/></td>
 							</tr>
@@ -138,10 +138,10 @@
 
 				<tr>
 					<td class="check-column"><input type="checkbox" disabled readonly /></td>
-					<td><input type="text" size="25" name="tr_city_name[0]"  value="<?php echo $this->table_rates['tr_city_name'][0];?>" readonly required placeholder="City Name" /></td>
-					<td class="center"><input type="text"  name="tr_no_class[0]"  value="<?php echo $this->table_rates['tr_no_class'][0];?>" required placeholder="0.00"/></td>
+					<td><input type="text" size="25" name="tr_city_name[0]"  value="<?php echo esc_html($this->table_rates['tr_city_name'][0]);?>" readonly required placeholder="City Name" /></td>
+					<td class="center"><input type="text"  name="tr_no_class[0]"  value="<?php echo esc_html($this->table_rates['tr_no_class'][0]);?>" required placeholder="0.00"/></td>
 					<?php foreach($this->get_def_shipping_classes() as $sclass){?>
-						<td class="center"><input type="text"  name="tr_class_<?php echo esc_html($sclass->slug); ?>[0]" value="<?php  echo esc_html($this->table_rates['tr_class_'.$sclass->slug][0]);?>" required placeholder="0.00"/></td>
+						<td class="center"><input type="text"  name="tr_class_<?php echo esc_html($sclass->slug); ?>[0]" value="<?php  echo esc_html($this->table_rates['tr_class_'.esc_html($sclass->slug)][0]);?>" required placeholder="0.00"/></td>
 					<?php }?>
 					<td class="center"><input type="checkbox" checked disabled readonly/></td>
 				</tr>
@@ -157,7 +157,7 @@
 								<td><input type="text" size="25" name="tr_city_name[<?php echo $key; ?>]" value="<?php echo esc_html($this->table_rates['tr_city_name'][$key]);?>" required placeholder="City Name" /></td>
 								<td class="center"><input type="text"  name="tr_no_class[<?php echo $key; ?>]" value="<?php echo esc_html($this->table_rates['tr_no_class'][$key]);?>" required placeholder="0.00"/></td>
 								<?php foreach($this->get_def_shipping_classes() as $sclass){?>
-									<td class="center"><input type="text"  name="tr_class_<?php echo $sclass->slug; ?>[<?php echo $key; ?>]" value="<?php echo @esc_html($this->table_rates['tr_class_'.$sclass->slug][$key]);?>" required placeholder="0.00"/></td>
+									<td class="center"><input type="text"  name="tr_class_<?php echo esc_html($sclass->slug); ?>[<?php echo $key; ?>]" value="<?php echo @esc_html($this->table_rates['tr_class_'.esc_html($sclass->slug)][$key]);?>" required placeholder="0.00"/></td>
 								<?php }?>
 								<td class="center"><input type="checkbox" name="tr_enabled[<?php echo $key; ?>]" <?php checked( $this->table_rates['tr_enabled'][$key], 'on' ); ?> value="on"/></td>
 							</tr>
